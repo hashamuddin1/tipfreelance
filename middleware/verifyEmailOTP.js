@@ -18,7 +18,7 @@ verification = async(req, res, next) => {
            
         } 
         else {
-            res.status(400).send({
+            return res.status(400).send({
                 success:false,
                 message:"OTP not Verified"
             })
