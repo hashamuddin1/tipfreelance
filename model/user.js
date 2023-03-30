@@ -6,9 +6,6 @@ const user_schema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    middle_name: {
-        type: String,
-    },
     last_name: {
         type: String,
         trim: true
@@ -31,6 +28,12 @@ const user_schema = new mongoose.Schema({
         trim: true,
     },
     profilePicture: {
+        type: String,
+    },
+    jobTitle: {
+        type: String,
+    },
+    organization: {
         type: String,
     },
 

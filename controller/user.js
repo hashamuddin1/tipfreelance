@@ -9,6 +9,7 @@ const { OtpPhone } = require("../model/phoneOTP");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
+const { ObjectId } = require('mongodb')
 
 const sendOTPEmail = async (req, res) => {
   try {
@@ -75,10 +76,19 @@ const signupEmail = async (req, res) => {
 
     await user.save();
 
+    const token = jwt.sign(
+      { _id: user._id, email: user.email },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "30d",
+      }
+    );
+
     return res.status(200).send({
       success: true,
       message: "User Registered Successfully",
       data: user,
+      token
     });
   } catch (e) {
     console.log(e);
@@ -214,10 +224,19 @@ const signupPhone=async(req,res)=>{
 
     await user.save();
 
+    const token = jwt.sign(
+      { _id: user._id, phone_number: user.phone_number },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "30d",
+      }
+    );
+
     return res.status(200).send({
       success: true,
       message: "User Registered Successfully",
       data: user,
+      token
     });
 
   }catch(e){
@@ -295,4 +314,84 @@ const signinPhone=async(req,res)=>{
   }
 }
 
-module.exports = { sendOTPEmail, signupEmail,signinEmail,sendOTPPhone,signupPhone,signinPhone };
+const updateUser=async(req,res)=>{
+  try{
+
+    if(!req.body.email){
+      return res.status(400).send({
+        success: false,
+        message: "Email Is Required",
+      });
+    }
+
+    if(!req.body.countryCode){
+      return res.status(400).send({
+        success: false,
+        message: "country Code Is Required",
+      });
+    }
+
+    if(!req.body.phoneNumber){
+      return res.status(400).send({
+        success: false,
+        message: "Phone Number Is Required",
+      });
+    }
+
+    if(!req.body.firstName){
+      return res.status(400).send({
+        success: false,
+        message: "First Name Is Required",
+      });
+    }
+
+    if(!req.body.lastName){
+      return res.status(400).send({
+        success: false,
+        message: "Last Name Is Required",
+      });
+    }
+
+    if(!req.body.jobTitle){
+      return res.status(400).send({
+        success: false,
+        message: "Job Title Is Required",
+      });
+    }
+
+    if(!req.body.organization){
+      return res.status(400).send({
+        success: false,
+        message: "Organization Is Required",
+      });
+    }
+
+    const updateProfile=await users.findByIdAndUpdate({_id:new ObjectId(req.query.id)},{
+      first_name:req.body.firstName,
+      last_name:req.body.lastName,
+      email:req.body.email,
+      country_code:req.body.countryCode,
+      phone_number:req.body.phoneNumber,
+      jobTitle:req.body.jobTitle,
+      organization:req.body.organization,
+      profilePicture:"https://tippee.herokuapp.com/"+req.file.path
+    },{
+      new:true
+    })
+
+    return res.status(200).send({
+      success: true,
+      message: "User Updated Successfully",
+      data: updateProfile,
+    });
+
+  }catch (e) {
+    console.log(e);
+    return res.status(400).send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+}
+
+module.exports = { sendOTPEmail, signupEmail,signinEmail,sendOTPPhone,signupPhone,signinPhone,updateUser };

@@ -3,11 +3,12 @@ const app = express();
 require("dotenv").config();
 const port = process.env.PORT;
 require('./config/db');
-const router = require('./router/route')
+const userRouter = require('./router/userRoute');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use([router])
+app.use('/uploads', express.static('uploads'));
+app.use([userRouter])
 
 app.listen(port, () => {
   console.log(`Our Server is running at port ${port}`);
