@@ -184,7 +184,7 @@ const sendOTPPhone=async(req,res)=>{
     .create({
        body:  `Your OTP is ${otp_Code}`,
        from: `${process.env.TWILIO_PHONE_NUMBER}`,
-       to: `${req.body.country_code}${req.body.phoneNumber}`
+       to: `${req.body.phoneNumber}`
      })
 
      return res.status(200).send({
@@ -363,6 +363,27 @@ const updateUser=async(req,res)=>{
       return res.status(400).send({
         success: false,
         message: "Organization Is Required",
+      });
+    }
+
+    if(!req.body.profilePicture){
+      const updateProfile=await users.findByIdAndUpdate({_id:new ObjectId(req.query.id)},{
+        first_name:req.body.firstName,
+        last_name:req.body.lastName,
+        email:req.body.email,
+        country_code:req.body.countryCode,
+        phone_number:req.body.phoneNumber,
+        jobTitle:req.body.jobTitle,
+        organization:req.body.organization,
+        jobDescription:req.body.jobDescription,
+      },{
+        new:true
+      })
+  
+      return res.status(200).send({
+        success: true,
+        message: "User Updated Successfully",
+        data: updateProfile,
       });
     }
 

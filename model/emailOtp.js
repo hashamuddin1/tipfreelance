@@ -20,8 +20,6 @@ const OtpSchema = new mongoose.Schema({
     timestamps: true
 });
 
-//creating collection
 const Otp = new mongoose.model('otp', OtpSchema)
 
-//export collection
 module.exports = { Otp };

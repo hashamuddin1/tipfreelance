@@ -31,6 +31,6 @@ userRouter.post("/api/sendOTPPhone",  sendOTPPhone);
 userRouter.post("/api/signupPhone",verificationPhone, signupPhone);
 userRouter.post("/api/signinPhone", signinPhone);
 
-userRouter.post("/api/updateUser",upload.single('profilePicture'), updateUser);
+userRouter.put("/api/updateUser",upload.single('profilePicture'), updateUser);
 
 module.exports = userRouter
