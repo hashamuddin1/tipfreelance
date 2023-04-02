@@ -33,6 +33,9 @@ const user_schema = new mongoose.Schema({
     jobTitle: {
         type: String,
     },
+    jobDescription: {
+        type: String,
+    },
     organization: {
         type: String,
     },

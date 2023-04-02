@@ -374,6 +374,7 @@ const updateUser=async(req,res)=>{
       phone_number:req.body.phoneNumber,
       jobTitle:req.body.jobTitle,
       organization:req.body.organization,
+      jobDescription:req.body.jobDescription,
       profilePicture:"https://tippee.herokuapp.com/"+req.file.path
     },{
       new:true
