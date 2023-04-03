@@ -75,8 +75,8 @@ const updateBank=async(req,res)=>{
 
 const getBankCard=async(req,res)=>{
     try{
-        const bankDetail=await Bank.find();
-        const cardDetail=await Card.find();
+        const bankDetail=await Bank.find({userId:new ObjectId(req.query.userId)});
+        const cardDetail=await Card.find({userId:new ObjectId(req.query.userId)});
 
         return res.status(200).send({
             success: true,

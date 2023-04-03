@@ -416,4 +416,21 @@ const updateUser=async(req,res)=>{
   }
 }
 
-module.exports = { sendOTPEmail, signupEmail,signinEmail,sendOTPPhone,signupPhone,signinPhone,updateUser };
+const allUser=async(req,res)=>{
+  try{
+    const fetchUser=await users.find({_id:{$ne:new ObjectId(req.query.userId)}})
+    return res.status(200).send({
+      success: true,
+      message: "All Users",
+      data:fetchUser
+    });
+  }catch (e) {
+    console.log(e);
+    return res.status(400).send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+}
+
+module.exports = { sendOTPEmail, signupEmail,signinEmail,sendOTPPhone,signupPhone,signinPhone,updateUser,allUser };
