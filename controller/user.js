@@ -88,6 +88,7 @@ const signupEmail = async (req, res) => {
       success: true,
       message: "User Registered Successfully",
       data: user,
+      tag:"email",
       token
     });
   } catch (e) {
@@ -138,6 +139,7 @@ const signinEmail=async(req,res)=>{
       success: true,
       message: "User Login Successfully",
       data: checkUser,
+      tag:"email",
       token
     });
 
@@ -236,6 +238,7 @@ const signupPhone=async(req,res)=>{
       success: true,
       message: "User Registered Successfully",
       data: user,
+      tag:"phone",
       token
     });
 
@@ -294,6 +297,7 @@ const signinPhone=async(req,res)=>{
       success: true,
       message: "User Login Successfully",
       data: checkUser,
+      tag:"phone",
       token
     });
 
@@ -418,7 +422,7 @@ const updateUser=async(req,res)=>{
 
 const allUser=async(req,res)=>{
   try{
-    const fetchUser=await users.find({_id:{$ne:new ObjectId(req.query.userId)}})
+    const fetchUser=await users.find({_id:{$ne:new ObjectId(req.query.userId)},availible:true})
     return res.status(200).send({
       success: true,
       message: "All Users",
@@ -433,4 +437,61 @@ const allUser=async(req,res)=>{
   }
 }
 
-module.exports = { sendOTPEmail, signupEmail,signinEmail,sendOTPPhone,signupPhone,signinPhone,updateUser,allUser };
+const updateAvailible=async(req,res)=>{
+  try{
+
+    const checkAvail=await users.findOne({_id:new ObjectId(req.query.id)})
+
+    if(!checkAvail){
+      return res.status(400).send({
+        success: false,
+        message: "User Not Found",
+      });
+    }
+
+    if(checkAvail.availible===false){
+      const updateAvail=await users.findByIdAndUpdate({_id:new ObjectId(req.query.id)},{
+        availible:true
+      },{
+        new:true
+      })
+
+      return res.status(200).send({
+        success: true,
+        message: "User Availibility Updated to True",
+      });
+    }
+
+    if(checkAvail.availible===true){
+      const updateAvail=await users.findByIdAndUpdate({_id:new ObjectId(req.query.id)},{
+        availible:false
+      },{
+        new:true
+      })
+
+      return res.status(200).send({
+        success: true,
+        message: "User Availibility Updated to False",
+      });
+    }
+
+  }catch (e) {
+    console.log(e);
+    return res.status(400).send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+}
+
+module.exports = { 
+  sendOTPEmail,
+  signupEmail,
+  signinEmail,
+  sendOTPPhone,
+  signupPhone,
+  signinPhone,
+  updateUser,
+  allUser,
+  updateAvailible 
+};

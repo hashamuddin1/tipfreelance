@@ -39,6 +39,10 @@ const user_schema = new mongoose.Schema({
     organization: {
         type: String,
     },
+    availible:{
+        type:Boolean,
+        default: false
+    }
 
 })
 
