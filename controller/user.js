@@ -370,7 +370,7 @@ const updateUser=async(req,res)=>{
       });
     }
 
-    if(!req.body.profilePicture){
+    if(!req.file){
       const updateProfile=await users.findByIdAndUpdate({_id:new ObjectId(req.query.id)},{
         first_name:req.body.firstName,
         last_name:req.body.lastName,
@@ -380,6 +380,7 @@ const updateUser=async(req,res)=>{
         jobTitle:req.body.jobTitle,
         organization:req.body.organization,
         jobDescription:req.body.jobDescription,
+        
       },{
         new:true
       })
@@ -391,25 +392,32 @@ const updateUser=async(req,res)=>{
       });
     }
 
-    const updateProfile=await users.findByIdAndUpdate({_id:new ObjectId(req.query.id)},{
-      first_name:req.body.firstName,
-      last_name:req.body.lastName,
-      email:req.body.email,
-      country_code:req.body.countryCode,
-      phone_number:req.body.phoneNumber,
-      jobTitle:req.body.jobTitle,
-      organization:req.body.organization,
-      jobDescription:req.body.jobDescription,
-      profilePicture:"https://tippee.herokuapp.com/"+req.file.path
-    },{
-      new:true
-    })
+    if(req.file){
 
-    return res.status(200).send({
-      success: true,
-      message: "User Updated Successfully",
-      data: updateProfile,
-    });
+      const updateProfile=await users.findByIdAndUpdate({_id:new ObjectId(req.query.id)},{
+        first_name:req.body.firstName,
+        last_name:req.body.lastName,
+        email:req.body.email,
+        country_code:req.body.countryCode,
+        phone_number:req.body.phoneNumber,
+        jobTitle:req.body.jobTitle,
+        organization:req.body.organization,
+        jobDescription:req.body.jobDescription,
+        profilePicture:"https://tippee.herokuapp.com/"+req.file.path
+      },{
+        new:true
+      })
+  
+      return res.status(200).send({
+        success: true,
+        message: "User Updated Successfully",
+        data: updateProfile,
+      });
+
+    }
+
+
+    
 
   }catch (e) {
     console.log(e);
