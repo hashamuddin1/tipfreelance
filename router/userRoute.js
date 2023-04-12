@@ -1,6 +1,6 @@
 const express = require('express');
 const userRouter = express.Router();
-const { sendOTPEmail,signupEmail,signinEmail,sendOTPPhone,signupPhone,signinPhone,updateUser,allUser,updateAvailible } = require('../controller/user')
+const { searchUser,sendOTPEmail,signupEmail,signinEmail,sendOTPPhone,signupPhone,signinPhone,updateUser,allUser,updateAvailible } = require('../controller/user')
 const { verification } = require("../middleware/verifyEmailOTP");
 const { verificationPhone } = require("../middleware/verifyPhoneOTP");
 const verifyToken=require("../middleware/loginValidate")
@@ -31,6 +31,7 @@ userRouter.post("/api/signinEmail", signinEmail);
 userRouter.post("/api/sendOTPPhone",  sendOTPPhone);
 userRouter.post("/api/signupPhone",verificationPhone, signupPhone);
 userRouter.post("/api/signinPhone", signinPhone);
+userRouter.post("/api/searchUser",verifyToken, searchUser);
 
 userRouter.get("/api/allUser",verifyToken, allUser);
 userRouter.put("/api/updateUser",upload.single('profilePicture'), updateUser);

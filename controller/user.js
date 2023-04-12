@@ -492,6 +492,26 @@ const updateAvailible=async(req,res)=>{
   }
 }
 
+const searchUser=async(req,res)=>{
+  try{
+
+    const searching= await users.find({first_name:{'$regex':new RegExp(req.body.first_name,"i")},_id:{$ne:new ObjectId(req.query.userId)}})
+
+    return res.status(200).send({
+      success: true,
+      message: "Search Result",
+      data:searching
+    });
+
+  }catch (e) {
+    console.log(e);
+    return res.status(400).send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+}
+
 module.exports = { 
   sendOTPEmail,
   signupEmail,
@@ -501,5 +521,6 @@ module.exports = {
   signinPhone,
   updateUser,
   allUser,
-  updateAvailible 
+  updateAvailible ,
+  searchUser
 };

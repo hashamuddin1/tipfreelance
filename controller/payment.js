@@ -1,6 +1,7 @@
 const { Payment } = require("../model/payment");
 require("dotenv").config();
 const { ObjectId } = require("mongodb");
+const { users } = require("../model/user");
 
 const getRecord = async (req, res) => {
   try {
@@ -36,12 +37,35 @@ const getRecord = async (req, res) => {
 
 const insertPayment=async(req,res)=>{
     try{
+
+      const senderData=await users.findOne({_id:new ObjectId(req.body.senderId)})
+      if(!senderData){
+        return res.status(400).send({
+          success: false,
+          message: "Sender User Not Found",
+         
+        });
+      }
+
+      const receiverData=await users.findOne({_id:new ObjectId(req.body.receiverId)})
+      if(!receiverData){
+        return res.status(400).send({
+          success: false,
+          message: "Receiver User Not Found",
+         
+        });
+      }
         const paymentInsert = new Payment({
-            senderName:"sara",
-            senderId: "643014a90c03754b820415b6",
-            receiverId: "642fcbf02593be7e9ed3e705",
-            type: "card",
-            amount: 24,
+            senderName:senderData.first_name,
+            receiverName:receiverData.first_name,
+            senderId: req.body.senderId,
+            receiverId: req.body.receiverId,
+            type:req.body.type,
+            amount: req.body.amount,
+            senderProfilePic: senderData.profilePicture,
+            receiverProfilePic: receiverData.profilePicture,
+            senderJobTitle:senderData.jobTitle,
+            receiverJobTitle: receiverData.jobTitle,
           });
       
           await paymentInsert.save();

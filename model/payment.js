@@ -5,6 +5,9 @@ const PaymentSchema = new mongoose.Schema({
     senderName: {
         type: String,
     },
+     receiverName: {
+        type: String,
+    },
     senderId: {
         type: Schema.Types.ObjectId,
         ref:"users"
@@ -12,6 +15,18 @@ const PaymentSchema = new mongoose.Schema({
     receiverId: {
         type: Schema.Types.ObjectId,
         ref:"users"
+    },
+    senderProfilePic: {
+        type: String,
+    },
+    receiverProfilePic: {
+        type: String,
+    },
+    senderJobTitle: {
+        type: String,
+    },
+    receiverJobTitle: {
+        type: String,
     },
     type: {
         type: String,
