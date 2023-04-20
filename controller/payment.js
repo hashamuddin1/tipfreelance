@@ -7,33 +7,34 @@ const stripe = require("stripe")(process.env.Secret_Key);
 const getRecord = async (req, res) => {
   try {
     if (req.query.senderId) {
-      let totalPayment=0
+      let totalPayment = 0;
       const fetchPayment = await Payment.find({
         senderId: new ObjectId(req.query.senderId),
       });
-      for(i=0;i<fetchPayment.length;i++){
-        totalPayment+=fetchPayment[i].amount
+      for (i = 0; i < fetchPayment.length; i++) {
+        totalPayment += fetchPayment[i].amount;
       }
       return res.status(200).send({
         success: true,
         message: "All Payment Record",
-        TotalPayment:totalPayment,
+        TotalPayment: totalPayment,
         data: fetchPayment,
       });
     }
 
     if (req.query.receiverId) {
-      let totalPayment=0
+      let totalPayment = 0;
       const fetchPayment = await Payment.find({
         receiverId: new ObjectId(req.query.receiverId),
+        isReceive: false,
       });
-      for(i=0;i<fetchPayment.length;i++){
-        totalPayment+=fetchPayment[i].amount
+      for (i = 0; i < fetchPayment.length; i++) {
+        totalPayment += fetchPayment[i].amount;
       }
       return res.status(200).send({
         success: true,
         message: "All Payment Record",
-        TotalPayment:totalPayment,
+        TotalPayment: totalPayment,
         data: fetchPayment,
       });
     }
@@ -70,6 +71,8 @@ const insertPayment = async (req, res) => {
 
     const customer = await stripe.customers.create();
 
+    console.log(customer.id)
+
     const param = {};
     param.card = {
       number: req.body.cardNumber,
@@ -105,7 +108,7 @@ const insertPayment = async (req, res) => {
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: req.body.amount * 100,
-      currency: "usd",
+      currency: "gbp",
       customer: customer.id,
       payment_method_types: ["card"],
     });
@@ -126,6 +129,7 @@ const insertPayment = async (req, res) => {
       receiverProfilePic: receiverData.profilePicture,
       senderJobTitle: senderData.jobTitle,
       receiverJobTitle: receiverData.jobTitle,
+      isReceive:false
     });
 
     await paymentInsert.save();
@@ -144,4 +148,32 @@ const insertPayment = async (req, res) => {
   }
 };
 
-module.exports = { getRecord, insertPayment };
+const receivePayment = async (req, res) => {
+  try {
+
+    const transfer = await stripe.transfers.create({
+      amount: req.body.amount,
+      currency: 'usd',
+      destination: req.body.accountId,
+  
+    })
+
+
+    const updateReceive=await Payment.updateMany({receiverId:new ObjectId(req.query.receiverId)},{
+      isReceive:true
+    },{new:true})
+
+    return res.status(200).send({
+      success: true,
+      message: "Payment Received Successfully",
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(400).send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+module.exports = { getRecord, insertPayment, receivePayment };

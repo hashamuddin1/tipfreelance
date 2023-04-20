@@ -2,6 +2,8 @@ const { Bank } = require("../model/bank");
 const { Card } = require("../model/card");
 require("dotenv").config();
 const { ObjectId } = require("mongodb");
+const stripe = require("stripe")(process.env.Secret_Key);
+
 
 const insertBank = async (req, res) => {
   try {
@@ -26,10 +28,82 @@ const insertBank = async (req, res) => {
       });
     }
 
+    const account = await stripe.accounts.create({
+      type: 'custom',
+      country: req.body.country,
+      email: "abc@gmail.com",
+      capabilities: {
+        transfers: { requested: true },
+      },
+      business_profile: {
+        mcc: req.body.mcc,
+        name: "demo",
+        support_email: "abc@gmail.com",
+    
+        support_url: "https://bestcookieco.com",
+        url: "https://bestcookieco.com",
+        support_address: {
+          city: "abc",
+          line1: "abc",
+          line2: "abc",
+          postal_code: req.body.Postal_code
+
+        }
+      },
+      business_type:"individual",
+      company: {
+        name: "jemex",
+        phone: "3365214895",
+        address: {
+          city: "abc",
+          line1: "abc",
+          line2:"abc",
+          postal_code: req.body.Postal_code
+        }
+      },
+      individual: {
+        address: {
+          city: "abc",
+          line1: "abc",
+          line2: "abc",
+          postal_code: req.body.Postal_code
+        },
+
+        dob: {
+          day: "5",
+          month: "5",
+          year: "1980",
+        },
+        email: "abc@gmail.com",
+        first_name: "abc",
+        last_name: "abc",
+        maiden_name: "abc",
+        phone: "3369857402",
+        registered_address: {
+          city: "abc",
+          line1: "abc",
+          line2: "abc",
+          postal_code: req.body.Postal_code
+        },
+       
+      },
+      external_account: {
+        account_number: req.body.accountNumber,
+        object: "bank_account",
+        country: req.body.country,
+       currency: req.body.currency,
+       //routing_number:"110000000"
+      
+      },
+     
+      tos_acceptance: { service_agreement: 'recipient',date: 1609798905, ip: '8.8.8.8' }
+    });
+
     const cardBank = new Bank({
       bankName: req.body.bankName,
       accountNumber: req.body.accountNumber,
       userId: req.query.userId,
+      accountId:account.id
     });
 
     await cardBank.save();

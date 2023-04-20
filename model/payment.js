@@ -35,6 +35,10 @@ const PaymentSchema = new mongoose.Schema({
     amount: {
         type: Number,
     },
+    isReceive: {
+        type: Boolean,
+        default:false
+    },
     date: {
         type: Date,
         default:Date.now
