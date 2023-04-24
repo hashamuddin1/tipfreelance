@@ -115,7 +115,7 @@ const insertPayment = async (req, res) => {
 
     const paymentIntent2 = await stripe.paymentIntents.confirm(
       paymentIntent.id,
-      { payment_method: "pm_card_visa" }
+      { payment_method: req.body.payment_method }
     );
 
     const paymentInsert = new Payment({
