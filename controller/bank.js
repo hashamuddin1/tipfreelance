@@ -3,6 +3,7 @@ const { Card } = require("../model/card");
 require("dotenv").config();
 const { ObjectId } = require("mongodb");
 const stripe = require("stripe")(process.env.Secret_Key);
+const fs = require('fs');
 
 
 const insertBank = async (req, res) => {
@@ -28,76 +29,174 @@ const insertBank = async (req, res) => {
       });
     }
 
-    const account = await stripe.accounts.create({
-      type: 'custom',
-      country: req.body.country,
-      email: "abc@gmail.com",
-      capabilities: {
-        transfers: { requested: true },
-      },
-      business_profile: {
-        mcc: req.body.mcc,
-        name: "demo",
-        support_email: "abc@gmail.com",
-    
-        support_url: "https://bestcookieco.com",
-        url: "https://bestcookieco.com",
-        support_address: {
-          city: "abc",
-          line1: "abc",
-          line2: "abc",
-          postal_code: req.body.Postal_code
+    let account;
 
-        }
-      },
-      business_type:"individual",
-      company: {
-        name: "jemex",
-        phone: "3365214895",
-        address: {
-          city: "abc",
-          line1: "abc",
-          line2:"abc",
-          postal_code: req.body.Postal_code
-        }
-      },
-      individual: {
-        address: {
-          city: "abc",
-          line1: "abc",
-          line2: "abc",
-          postal_code: req.body.Postal_code
-        },
-
-        dob: {
-          day: "5",
-          month: "5",
-          year: "1980",
-        },
+    if(req.body.country==="US"){
+      account = await stripe.accounts.create({
+        type: 'custom',
+        country: req.body.country,
         email: "abc@gmail.com",
-        first_name: "abc",
-        last_name: "abc",
-        maiden_name: "abc",
-        phone: "3369857402",
-        registered_address: {
-          city: "abc",
-          line1: "abc",
-          line2: "abc",
-          postal_code: req.body.Postal_code
+        capabilities: {
+        
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+        business_profile: {
+          mcc: req.body.mcc,
+          name: "demo2",
+          support_email: "abc@gmail.com",
+      
+          support_url: "https://bestcookieco.com",
+          url: "https://bestcookieco.com",
+          support_address: {
+            city: "abc",
+            line1: "abc",
+            line2: "abc",
+            postal_code: req.body.Postal_code
+  
+          }
+        },
+        business_type:"individual",
+        company: {
+          name: "jemex",
+          phone: "3365214895",
+          address: {
+            city: "abc",
+            line1: "abc",
+            line2:"abc",
+            postal_code: req.body.Postal_code
+          }
+        },
+        individual: {
+          address: {
+            city: "abc",
+            state:"New York",
+            line1: "abc",
+            line2: "abc",
+            postal_code: req.body.Postal_code,
+            
+          },
+          ssn_last_4:'6789',
+          id_number:"123456789",
+         
+          verification:{
+            additional_document:{
+         
+              front:"file_identity_document_success",
+            },
+            document:{
+             
+              front:"file_identity_document_success",
+            }
+
+          },
+
+  
+          dob: {
+            day: "5",
+            month: "5",
+            year: "1980",
+          },
+          email: "abc@gmail.com",
+          first_name: "abc",
+          last_name: "abc",
+          maiden_name: "abc",
+          phone: "3369857402",
+          registered_address: {
+            city: "abc",
+            line1: "abc",
+            line2: "abc",
+            postal_code: req.body.Postal_code
+          },
+         
+        },
+        external_account: {
+          account_number: req.body.accountNumber,
+          object: "bank_account",
+          country: req.body.country,
+         currency: req.body.currency,
+         routing_number:"110000000"
+        
         },
        
-      },
-      external_account: {
-        account_number: req.body.accountNumber,
-        object: "bank_account",
+        tos_acceptance: { date: 1609798905, ip: '8.8.8.8' }
+      });
+    } else{
+
+      account = await stripe.accounts.create({
+        type: 'custom',
         country: req.body.country,
-       currency: req.body.currency,
-       //routing_number:"110000000"
+        email: "abc@gmail.com",
+        capabilities: {
+          transfers: { requested: true },
+        },
+        business_profile: {
+          mcc: req.body.mcc,
+          name: "demo",
+          support_email: "abc@gmail.com",
       
-      },
-     
-      tos_acceptance: { service_agreement: 'recipient',date: 1609798905, ip: '8.8.8.8' }
-    });
+          support_url: "https://bestcookieco.com",
+          url: "https://bestcookieco.com",
+          support_address: {
+            city: "abc",
+            line1: "abc",
+            line2: "abc",
+            postal_code: req.body.Postal_code
+  
+          }
+        },
+        business_type:"individual",
+        company: {
+          name: "jemex",
+          phone: "3365214895",
+          address: {
+            city: "abc",
+            line1: "abc",
+            line2:"abc",
+            postal_code: req.body.Postal_code
+          }
+        },
+        individual: {
+          address: {
+            city: "abc",
+            line1: "abc",
+            line2: "abc",
+            postal_code: req.body.Postal_code
+          },
+  
+          dob: {
+            day: "5",
+            month: "5",
+            year: "1980",
+          },
+          email: "abc@gmail.com",
+          first_name: "abc",
+          last_name: "abc",
+          maiden_name: "abc",
+          phone: "3369857402",
+          registered_address: {
+            city: "abc",
+            line1: "abc",
+            line2: "abc",
+            postal_code: req.body.Postal_code
+          },
+         
+        },
+        external_account: {
+          account_number: req.body.accountNumber,
+          object: "bank_account",
+          country: req.body.country,
+         currency: req.body.currency,
+         //routing_number:"110000000"
+        
+        },
+       
+        tos_acceptance: { service_agreement: 'recipient',date: 1609798905, ip: '8.8.8.8' }
+      });
+
+    }
+
+   
 
     const cardBank = new Bank({
       bankName: req.body.bankName,
