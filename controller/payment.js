@@ -71,8 +71,6 @@ const insertPayment = async (req, res) => {
 
     const customer = await stripe.customers.create();
 
-    console.log(customer.id)
-
     const param = {};
     param.card = {
       number: req.body.cardNumber,
@@ -129,7 +127,9 @@ const insertPayment = async (req, res) => {
       receiverProfilePic: receiverData.profilePicture,
       senderJobTitle: senderData.jobTitle,
       receiverJobTitle: receiverData.jobTitle,
-      isReceive:false
+      isReceive:false,
+      gifImage:"https://tippee.herokuapp.com/"+req.file.path,
+      note:req.body.note
     });
 
     await paymentInsert.save();

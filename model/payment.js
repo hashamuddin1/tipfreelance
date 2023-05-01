@@ -39,6 +39,12 @@ const PaymentSchema = new mongoose.Schema({
         type: Boolean,
         default:false
     },
+    gifImage: {
+        type: String,
+    },
+    note: {
+        type: String,
+    },
     date: {
         type: Date,
         default:Date.now

@@ -392,7 +392,7 @@ const updateUser=async(req,res)=>{
       });
     }
 
-    if(req.file){
+    if(req.file){ 
 
       const updateProfile=await users.findByIdAndUpdate({_id:new ObjectId(req.query.id)},{
         first_name:req.body.firstName,
