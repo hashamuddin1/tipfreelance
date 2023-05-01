@@ -116,29 +116,54 @@ const insertPayment = async (req, res) => {
       { payment_method: req.body.payment_method }
     );
 
-    const paymentInsert = new Payment({
-      senderName: senderData.first_name,
-      receiverName: receiverData.first_name,
-      senderId: req.body.senderId,
-      receiverId: req.body.receiverId,
-      type: req.body.type,
-      amount: req.body.amount,
-      senderProfilePic: senderData.profilePicture,
-      receiverProfilePic: receiverData.profilePicture,
-      senderJobTitle: senderData.jobTitle,
-      receiverJobTitle: receiverData.jobTitle,
-      isReceive:false,
-      gifImage:"https://tippee.herokuapp.com/"+req.file.path,
-      note:req.body.note
-    });
+    if (!req.file) {
+      const paymentInsert = new Payment({
+        senderName: senderData.first_name,
+        receiverName: receiverData.first_name,
+        senderId: req.body.senderId,
+        receiverId: req.body.receiverId,
+        type: req.body.type,
+        amount: req.body.amount,
+        senderProfilePic: senderData.profilePicture,
+        receiverProfilePic: receiverData.profilePicture,
+        senderJobTitle: senderData.jobTitle,
+        receiverJobTitle: receiverData.jobTitle,
+        isReceive: false,
+        note: req.body.note,
+      });
 
-    await paymentInsert.save();
+      await paymentInsert.save();
 
-    return res.status(200).send({
-      success: true,
-      message: "Payment Inserted Successfully",
-      data: paymentInsert,
-    });
+      return res.status(200).send({
+        success: true,
+        message: "Payment Inserted Successfully",
+        data: paymentInsert,
+      });
+    }
+    if (req.file) {
+      const paymentInsert = new Payment({
+        senderName: senderData.first_name,
+        receiverName: receiverData.first_name,
+        senderId: req.body.senderId,
+        receiverId: req.body.receiverId,
+        type: req.body.type,
+        amount: req.body.amount,
+        senderProfilePic: senderData.profilePicture,
+        receiverProfilePic: receiverData.profilePicture,
+        senderJobTitle: senderData.jobTitle,
+        receiverJobTitle: receiverData.jobTitle,
+        isReceive: false,
+        gifImage: "https://tippee.herokuapp.com/" + req.file.path,
+        note: req.body.note,
+      });
+      await paymentInsert.save();
+
+      return res.status(200).send({
+        success: true,
+        message: "Payment Inserted Successfully",
+        data: paymentInsert,
+      });
+    }
   } catch (e) {
     console.log(e);
     return res.status(400).send({
@@ -150,18 +175,19 @@ const insertPayment = async (req, res) => {
 
 const receivePayment = async (req, res) => {
   try {
-
     const transfer = await stripe.transfers.create({
       amount: req.body.amount,
-      currency: 'usd',
+      currency: "usd",
       destination: req.body.accountId,
-  
-    })
+    });
 
-
-    const updateReceive=await Payment.updateMany({receiverId:new ObjectId(req.query.receiverId)},{
-      isReceive:true
-    },{new:true})
+    const updateReceive = await Payment.updateMany(
+      { receiverId: new ObjectId(req.query.receiverId) },
+      {
+        isReceive: true,
+      },
+      { new: true }
+    );
 
     return res.status(200).send({
       success: true,
