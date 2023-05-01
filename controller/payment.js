@@ -8,33 +8,64 @@ const getRecord = async (req, res) => {
   try {
     if (req.query.senderId) {
       let totalPayment = 0;
+      var date = new Date();
+      var dateString = new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .split("T")[0];
       const fetchPayment = await Payment.find({
         senderId: new ObjectId(req.query.senderId),
+        date: {$lt:`${dateString}T00:00:00.000+00:00`},
+      });
+      
+        
+      const fetchPaymentToday = await Payment.find({
+        senderId: new ObjectId(req.query.senderId),
+        date: {$gte:`${dateString}T00:00:00.000+00:00`},
       });
       for (i = 0; i < fetchPayment.length; i++) {
         totalPayment += fetchPayment[i].amount;
+      }
+      for (i = 0; i < fetchPaymentToday.length; i++) {
+        totalPayment += fetchPaymentToday[i].amount;
       }
       return res.status(200).send({
         success: true,
         message: "All Payment Record",
         TotalPayment: totalPayment,
+        todayPayment: fetchPaymentToday,
         data: fetchPayment,
       });
     }
 
     if (req.query.receiverId) {
       let totalPayment = 0;
+      var date = new Date();
+      var dateString = new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .split("T")[0];
       const fetchPayment = await Payment.find({
         receiverId: new ObjectId(req.query.receiverId),
-        isReceive: false,
+        date: {$lt:`${dateString}T00:00:00.000+00:00`},
+      });
+      const fetchPaymentToday = await Payment.find({
+        receiverId: new ObjectId(req.query.receiverId),
+        date: {$gte:`${dateString}T00:00:00.000+00:00`},
       });
       for (i = 0; i < fetchPayment.length; i++) {
         totalPayment += fetchPayment[i].amount;
+      }
+      for (i = 0; i < fetchPaymentToday.length; i++) {
+        totalPayment += fetchPaymentToday[i].amount;
       }
       return res.status(200).send({
         success: true,
         message: "All Payment Record",
         TotalPayment: totalPayment,
+        todayPayment: fetchPaymentToday,
         data: fetchPayment,
       });
     }
