@@ -17,7 +17,7 @@ const getRecord = async (req, res) => {
         .split("T")[0];
       const fetchPayment = await Payment.find({
         senderId: new ObjectId(req.query.senderId),
-        //date: { $lt: `${dateString}T00:00:00.000+00:00` },
+        date: { $lt: `${dateString}T00:00:00.000+00:00` },
       }).select({
         _id: 1,
         senderName: 1,
@@ -214,7 +214,7 @@ const insertPayment = async (req, res) => {
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
         isReceive: false,
-        gifImage: "localhost:3004/" + req.file.path,
+        gifImage: "https://tippee.herokuapp.com/" + req.file.path,
         note: req.body.note,
       });
       await paymentInsert.save();
