@@ -4,10 +4,12 @@ const Schema = mongoose.Schema;
 const user_schema = new mongoose.Schema({
     first_name: {
         type: String,
+        default: null,
         trim: true
     },
     last_name: {
         type: String,
+        default: null,
         trim: true
     },
     email: {
@@ -29,15 +31,19 @@ const user_schema = new mongoose.Schema({
     },
     profilePicture: {
         type: String,
+        default: null,
     },
     jobTitle: {
         type: String,
+        default: null,
     },
     jobDescription: {
         type: String,
+        default: null,
     },
     organization: {
         type: String,
+        default: null,
     },
     availible:{
         type:Boolean,

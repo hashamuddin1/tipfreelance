@@ -4,9 +4,11 @@ const Schema = mongoose.Schema;
 const PaymentSchema = new mongoose.Schema({
     senderName: {
         type: String,
+        required:true
     },
      receiverName: {
         type: String,
+        required:true
     },
     senderId: {
         type: Schema.Types.ObjectId,
@@ -34,6 +36,7 @@ const PaymentSchema = new mongoose.Schema({
     },
     amount: {
         type: Number,
+        required:true
     },
     isReceive: {
         type: Boolean,
@@ -41,9 +44,11 @@ const PaymentSchema = new mongoose.Schema({
     },
     gifImage: {
         type: String,
+        default:null
     },
     note: {
         type: String,
+        default:null
     },
     date: {
         type: Date,

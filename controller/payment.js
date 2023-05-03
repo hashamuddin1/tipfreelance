@@ -8,6 +8,7 @@ const getRecord = async (req, res) => {
   try {
     if (req.query.senderId) {
       let totalPayment = 0;
+      let todayTotalPayment = 0;
       var date = new Date();
       var dateString = new Date(
         date.getTime() - date.getTimezoneOffset() * 60000
@@ -16,24 +17,40 @@ const getRecord = async (req, res) => {
         .split("T")[0];
       const fetchPayment = await Payment.find({
         senderId: new ObjectId(req.query.senderId),
-        date: {$lt:`${dateString}T00:00:00.000+00:00`},
+        //date: { $lt: `${dateString}T00:00:00.000+00:00` },
+      }).select({
+        _id: 1,
+        senderName: 1,
+        receiverName: 1,
+        senderId: 1,
+        receiverId: 1,
+        senderProfilePic: 1,
+        receiverProfilePic: 1,
+        senderJobTitle: 1,
+        receiverJobTitle: 1,
+        type: 1,
+        amount: 1,
+        isReceive: 1,
+        gifImage: 1,
+        note: 1,
+        date: 1,
       });
-      
-        
+
       const fetchPaymentToday = await Payment.find({
         senderId: new ObjectId(req.query.senderId),
-        date: {$gte:`${dateString}T00:00:00.000+00:00`},
+        date: { $gte: `${dateString}T00:00:00.000+00:00` },
       });
       for (i = 0; i < fetchPayment.length; i++) {
         totalPayment += fetchPayment[i].amount;
       }
       for (i = 0; i < fetchPaymentToday.length; i++) {
-        totalPayment += fetchPaymentToday[i].amount;
+        todayTotalPayment += fetchPaymentToday[i].amount;
       }
       return res.status(200).send({
         success: true,
         message: "All Payment Record",
         TotalPayment: totalPayment,
+        todayTotalPayment: todayTotalPayment,
         todayPayment: fetchPaymentToday,
         data: fetchPayment,
       });
@@ -41,6 +58,8 @@ const getRecord = async (req, res) => {
 
     if (req.query.receiverId) {
       let totalPayment = 0;
+      let todayTotalPayment = 0;
+      let totalAvailible = 0;
       var date = new Date();
       var dateString = new Date(
         date.getTime() - date.getTimezoneOffset() * 60000
@@ -49,22 +68,32 @@ const getRecord = async (req, res) => {
         .split("T")[0];
       const fetchPayment = await Payment.find({
         receiverId: new ObjectId(req.query.receiverId),
-        date: {$lt:`${dateString}T00:00:00.000+00:00`},
+        date: { $lt: `${dateString}T00:00:00.000+00:00` },
       });
       const fetchPaymentToday = await Payment.find({
         receiverId: new ObjectId(req.query.receiverId),
-        date: {$gte:`${dateString}T00:00:00.000+00:00`},
+        date: { $gte: `${dateString}T00:00:00.000+00:00` },
+      });
+
+      const fetchPaymentWithdraw = await Payment.find({
+        receiverId: new ObjectId(req.query.receiverId),
+        isReceive: false,
       });
       for (i = 0; i < fetchPayment.length; i++) {
         totalPayment += fetchPayment[i].amount;
       }
       for (i = 0; i < fetchPaymentToday.length; i++) {
-        totalPayment += fetchPaymentToday[i].amount;
+        todayTotalPayment += fetchPaymentToday[i].amount;
+      }
+      for (i = 0; i < fetchPaymentWithdraw.length; i++) {
+        totalAvailible += fetchPaymentWithdraw[i].amount;
       }
       return res.status(200).send({
         success: true,
         message: "All Payment Record",
         TotalPayment: totalPayment,
+        todayTotalPayment: todayTotalPayment,
+        totalAvailible: totalAvailible,
         todayPayment: fetchPaymentToday,
         data: fetchPayment,
       });
@@ -147,6 +176,7 @@ const insertPayment = async (req, res) => {
       { payment_method: req.body.payment_method }
     );
 
+
     if (!req.file) {
       const paymentInsert = new Payment({
         senderName: senderData.first_name,
@@ -184,7 +214,7 @@ const insertPayment = async (req, res) => {
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
         isReceive: false,
-        gifImage: "https://tippee.herokuapp.com/" + req.file.path,
+        gifImage: "localhost:3004/" + req.file.path,
         note: req.body.note,
       });
       await paymentInsert.save();
