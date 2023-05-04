@@ -279,6 +279,14 @@ const insertPayment = async (req, res) => {
       { payment_method: req.body.payment_method }
     );
 
+    var date = new Date();
+
+    var dateString = new Date(
+      date.getTime() - date.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split("T")[0];
+
 
     if (!req.file) {
       const paymentInsert = new Payment({
@@ -292,6 +300,7 @@ const insertPayment = async (req, res) => {
         receiverProfilePic: receiverData.profilePicture,
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
+        date:dateString,
         isReceive: false,
         note: req.body.note,
       });
@@ -317,6 +326,7 @@ const insertPayment = async (req, res) => {
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
         isReceive: false,
+        date:dateString,
         gifImage: "https://tippee.herokuapp.com/" + req.file.path,
         note: req.body.note,
       });
