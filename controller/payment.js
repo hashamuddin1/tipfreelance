@@ -287,6 +287,11 @@ const insertPayment = async (req, res) => {
       .toISOString()
       .split("T")[0];
 
+      const now = new Date();
+const hours = String(now.getHours()).padStart(2, '0');
+const minutes = String(now.getMinutes()).padStart(2, '0');
+const seconds = String(now.getSeconds()).padStart(2, '0');
+
 
     if (!req.file) {
       const paymentInsert = new Payment({
@@ -300,7 +305,7 @@ const insertPayment = async (req, res) => {
         receiverProfilePic: receiverData.profilePicture,
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
-        date:dateString,
+        date:`${dateString}T${hours}:${minutes}:${seconds}`,
         isReceive: false,
         note: req.body.note,
       });
@@ -326,7 +331,7 @@ const insertPayment = async (req, res) => {
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
         isReceive: false,
-        date:dateString,
+        date:`${dateString}T${hours}:${minutes}:${seconds}`,
         gifImage: "https://tippee.herokuapp.com/" + req.file.path,
         note: req.body.note,
       });
