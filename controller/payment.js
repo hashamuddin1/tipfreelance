@@ -2,11 +2,12 @@ const { Payment } = require("../model/payment");
 require("dotenv").config();
 const { ObjectId } = require("mongodb");
 const { users } = require("../model/user");
+const { AvailiblePayment } = require("../model/availiblePayment");
 const stripe = require("stripe")(process.env.Secret_Key);
 
 const getRecord = async (req, res) => {
   try {
-    if(req.query.firstName){
+    if (req.query.firstName) {
       if (req.query.senderId) {
         let totalPayment = 0;
         let todayTotalPayment = 0;
@@ -19,7 +20,7 @@ const getRecord = async (req, res) => {
 
         const fetchPayment = await Payment.find({
           senderId: new ObjectId(req.query.senderId),
-          receiverName:{'$regex':new RegExp(req.query.firstName,"i")},
+          receiverName: { $regex: new RegExp(req.query.firstName, "i") },
           date: { $lt: `${dateString}T00:00:00.000+00:00` },
         }).select({
           _id: 1,
@@ -38,10 +39,10 @@ const getRecord = async (req, res) => {
           note: 1,
           date: 1,
         });
-  
+
         const fetchPaymentToday = await Payment.find({
           senderId: new ObjectId(req.query.senderId),
-          receiverName:{'$regex':new RegExp(req.query.firstName,"i")},
+          receiverName: { $regex: new RegExp(req.query.firstName, "i") },
           date: { $gte: `${dateString}T00:00:00.000+00:00` },
         });
         for (i = 0; i < fetchPayment.length; i++) {
@@ -59,7 +60,7 @@ const getRecord = async (req, res) => {
           data: fetchPayment,
         });
       }
-  
+
       if (req.query.receiverId) {
         let totalPayment = 0;
         let todayTotalPayment = 0;
@@ -72,18 +73,18 @@ const getRecord = async (req, res) => {
           .split("T")[0];
         const fetchPayment = await Payment.find({
           receiverId: new ObjectId(req.query.receiverId),
-          senderName:{'$regex':new RegExp(req.query.firstName,"i")},
+          senderName: { $regex: new RegExp(req.query.firstName, "i") },
           date: { $lt: `${dateString}T00:00:00.000+00:00` },
         });
         const fetchPaymentToday = await Payment.find({
           receiverId: new ObjectId(req.query.receiverId),
-          senderName:{'$regex':new RegExp(req.query.firstName,"i")},
+          senderName: { $regex: new RegExp(req.query.firstName, "i") },
           date: { $gte: `${dateString}T00:00:00.000+00:00` },
         });
-  
+
         const fetchPaymentWithdraw = await Payment.find({
           receiverId: new ObjectId(req.query.receiverId),
-          senderName:{'$regex':new RegExp(req.query.firstName,"i")},
+          senderName: { $regex: new RegExp(req.query.firstName, "i") },
           isReceive: false,
         });
         for (i = 0; i < fetchPayment.length; i++) {
@@ -105,7 +106,6 @@ const getRecord = async (req, res) => {
           data: fetchPayment,
         });
       }
-
     }
     if (req.query.senderId) {
       let totalPayment = 0;
@@ -117,7 +117,7 @@ const getRecord = async (req, res) => {
 
         .toISOString()
         .split("T")[0];
-      
+
       const fetchPayment = await Payment.find({
         senderId: new ObjectId(req.query.senderId),
         date: { $lt: `${dateString}T00:00:00.000+00:00` },
@@ -162,7 +162,7 @@ const getRecord = async (req, res) => {
     if (req.query.receiverId) {
       let totalPayment = 0;
       let todayTotalPayment = 0;
-      let totalAvailible = 0;
+
       var date = new Date();
       var dateString = new Date(
         date.getTime() - date.getTimezoneOffset() * 60000
@@ -178,19 +178,25 @@ const getRecord = async (req, res) => {
         date: { $gte: `${dateString}T00:00:00.000+00:00` },
       });
 
-      const fetchPaymentWithdraw = await Payment.find({
-        receiverId: new ObjectId(req.query.receiverId),
-        isReceive: false,
-      });
       for (i = 0; i < fetchPayment.length; i++) {
         totalPayment += fetchPayment[i].amount;
       }
       for (i = 0; i < fetchPaymentToday.length; i++) {
         todayTotalPayment += fetchPaymentToday[i].amount;
       }
-      for (i = 0; i < fetchPaymentWithdraw.length; i++) {
-        totalAvailible += fetchPaymentWithdraw[i].amount;
+
+      let totalAvailible;
+
+      const fetchReceiverID = await AvailiblePayment.findOne({
+        receiverId: req.query.receiverId,
+      });
+
+      if (fetchReceiverID == null) {
+        totalAvailible = 0;
+      }else{
+        totalAvailible=fetchReceiverID.amount
       }
+
       return res.status(200).send({
         success: true,
         message: "All Payment Record",
@@ -281,17 +287,14 @@ const insertPayment = async (req, res) => {
 
     var date = new Date();
 
-    var dateString = new Date(
-      date.getTime() - date.getTimezoneOffset() * 60000
-    )
+    var dateString = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
       .toISOString()
       .split("T")[0];
 
-      const now = new Date();
-const hours = String(now.getHours()).padStart(2, '0');
-const minutes = String(now.getMinutes()).padStart(2, '0');
-const seconds = String(now.getSeconds()).padStart(2, '0');
-
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
 
     if (!req.file) {
       const paymentInsert = new Payment({
@@ -305,12 +308,31 @@ const seconds = String(now.getSeconds()).padStart(2, '0');
         receiverProfilePic: receiverData.profilePicture,
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
-        date:`${dateString}T${hours}:${minutes}:${seconds}`,
+        date: `${dateString}T${hours}:${minutes}:${seconds}`,
         isReceive: false,
         note: req.body.note,
       });
 
       await paymentInsert.save();
+
+      const fetchReceiverID = await AvailiblePayment.findOne({
+        receiverId: req.body.receiverId,
+      });
+
+      if (fetchReceiverID != null) {
+        const availiblePaymentUpdate = await AvailiblePayment.findOneAndUpdate(
+          { receiverId: req.body.receiverId },
+          { $inc: { amount: req.body.amount } },
+          { new: true }
+        );
+      } else {
+        const availiblePaymentInsert = new AvailiblePayment({
+          receiverId: req.body.receiverId,
+          amount: req.body.amount,
+        });
+
+        await availiblePaymentInsert.save();
+      }
 
       return res.status(200).send({
         success: true,
@@ -331,11 +353,30 @@ const seconds = String(now.getSeconds()).padStart(2, '0');
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
         isReceive: false,
-        date:`${dateString}T${hours}:${minutes}:${seconds}`,
+        date: `${dateString}T${hours}:${minutes}:${seconds}`,
         gifImage: "https://tippee.herokuapp.com/" + req.file.path,
         note: req.body.note,
       });
       await paymentInsert.save();
+
+      const fetchReceiverID = await AvailiblePayment.findOne({
+        receiverId: req.body.receiverId,
+      });
+
+      if (fetchReceiverID != null) {
+        const availiblePaymentUpdate = await AvailiblePayment.findOneAndUpdate(
+          { receiverId: req.body.receiverId },
+          { $inc: { amount: req.body.amount } },
+          { new: true }
+        );
+      } else {
+        const availiblePaymentInsert = new AvailiblePayment({
+          receiverId: req.body.receiverId,
+          amount: req.body.amount,
+        });
+
+        await availiblePaymentInsert.save();
+      }
 
       return res.status(200).send({
         success: true,
@@ -365,6 +406,12 @@ const receivePayment = async (req, res) => {
       {
         isReceive: true,
       },
+      { new: true }
+    );
+
+    const availiblePaymentUpdate = await AvailiblePayment.findOneAndUpdate(
+      { receiverId: req.query.receiverId },
+      { $inc: { amount: -req.body.amount } },
       { new: true }
     );
 
