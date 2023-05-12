@@ -12,16 +12,15 @@ const getRecord = async (req, res) => {
         let totalPayment = 0;
         let todayTotalPayment = 0;
         var date = new Date();
-        var dateString = new Date(
-          date.getTime() - date.getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .split("T")[0];
+        const year = date.getUTCFullYear();
+        const month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
+        const day = ("0" + date.getUTCDate()).slice(-2);
+        const formattedDate = `${year}-${month}-${day}`;
 
         const fetchPayment = await Payment.find({
           senderId: new ObjectId(req.query.senderId),
           receiverName: { $regex: new RegExp(req.query.firstName, "i") },
-          date: { $lt: `${dateString}T00:00:00.000+00:00` },
+          date: { $lt: `${formattedDate}T00:00:00.000+00:00` },
         }).select({
           _id: 1,
           senderName: 1,
@@ -43,7 +42,7 @@ const getRecord = async (req, res) => {
         const fetchPaymentToday = await Payment.find({
           senderId: new ObjectId(req.query.senderId),
           receiverName: { $regex: new RegExp(req.query.firstName, "i") },
-          date: { $gte: `${dateString}T00:00:00.000+00:00` },
+          date: { $gte: `${formattedDate}T00:00:00.000+00:00` },
         });
         for (i = 0; i < fetchPayment.length; i++) {
           totalPayment += fetchPayment[i].amount;
@@ -64,22 +63,21 @@ const getRecord = async (req, res) => {
       if (req.query.receiverId) {
         let totalPayment = 0;
         let todayTotalPayment = 0;
-        let totalAvailible = 0;
+
         var date = new Date();
-        var dateString = new Date(
-          date.getTime() - date.getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .split("T")[0];
+        const year = date.getUTCFullYear();
+        const month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
+        const day = ("0" + date.getUTCDate()).slice(-2);
+        const formattedDate = `${year}-${month}-${day}`;
         const fetchPayment = await Payment.find({
           receiverId: new ObjectId(req.query.receiverId),
           senderName: { $regex: new RegExp(req.query.firstName, "i") },
-          date: { $lt: `${dateString}T00:00:00.000+00:00` },
+          date: { $lt: `${formattedDate}T00:00:00.000+00:00` },
         });
         const fetchPaymentToday = await Payment.find({
           receiverId: new ObjectId(req.query.receiverId),
           senderName: { $regex: new RegExp(req.query.firstName, "i") },
-          date: { $gte: `${dateString}T00:00:00.000+00:00` },
+          date: { $gte: `${formattedDate}T00:00:00.000+00:00` },
         });
 
         const fetchPaymentWithdraw = await Payment.find({
@@ -93,8 +91,16 @@ const getRecord = async (req, res) => {
         for (i = 0; i < fetchPaymentToday.length; i++) {
           todayTotalPayment += fetchPaymentToday[i].amount;
         }
-        for (i = 0; i < fetchPaymentWithdraw.length; i++) {
-          totalAvailible += fetchPaymentWithdraw[i].amount;
+        let totalAvailible;
+
+        const fetchReceiverID = await AvailiblePayment.findOne({
+          receiverId: req.query.receiverId,
+        });
+
+        if (fetchReceiverID == null) {
+          totalAvailible = 0;
+        } else {
+          totalAvailible = fetchReceiverID.amount;
         }
         return res.status(200).send({
           success: true,
@@ -111,16 +117,14 @@ const getRecord = async (req, res) => {
       let totalPayment = 0;
       let todayTotalPayment = 0;
       var date = new Date();
-      var dateString = new Date(
-        date.getTime() - date.getTimezoneOffset() * 60000
-      )
-
-        .toISOString()
-        .split("T")[0];
+      const year = date.getUTCFullYear();
+      const month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
+      const day = ("0" + date.getUTCDate()).slice(-2);
+      const formattedDate = `${year}-${month}-${day}`;
 
       const fetchPayment = await Payment.find({
         senderId: new ObjectId(req.query.senderId),
-        date: { $lt: `${dateString}T00:00:00.000+00:00` },
+        date: { $lt: `${formattedDate}T00:00:00.000+00:00` },
       }).select({
         _id: 1,
         senderName: 1,
@@ -141,7 +145,7 @@ const getRecord = async (req, res) => {
 
       const fetchPaymentToday = await Payment.find({
         senderId: new ObjectId(req.query.senderId),
-        date: { $gte: `${dateString}T00:00:00.000+00:00` },
+        date: { $gte: `${formattedDate}T00:00:00.000+00:00` },
       });
       for (i = 0; i < fetchPayment.length; i++) {
         totalPayment += fetchPayment[i].amount;
@@ -164,18 +168,17 @@ const getRecord = async (req, res) => {
       let todayTotalPayment = 0;
 
       var date = new Date();
-      var dateString = new Date(
-        date.getTime() - date.getTimezoneOffset() * 60000
-      )
-        .toISOString()
-        .split("T")[0];
+      const year = date.getUTCFullYear();
+      const month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
+      const day = ("0" + date.getUTCDate()).slice(-2);
+      const formattedDate = `${year}-${month}-${day}`;
       const fetchPayment = await Payment.find({
         receiverId: new ObjectId(req.query.receiverId),
-        date: { $lt: `${dateString}T00:00:00.000+00:00` },
+        date: { $lt: `${formattedDate}T00:00:00.000+00:00` },
       });
       const fetchPaymentToday = await Payment.find({
         receiverId: new ObjectId(req.query.receiverId),
-        date: { $gte: `${dateString}T00:00:00.000+00:00` },
+        date: { $gte: `${formattedDate}T00:00:00.000+00:00` },
       });
 
       for (i = 0; i < fetchPayment.length; i++) {
@@ -193,8 +196,8 @@ const getRecord = async (req, res) => {
 
       if (fetchReceiverID == null) {
         totalAvailible = 0;
-      }else{
-        totalAvailible=fetchReceiverID.amount
+      } else {
+        totalAvailible = fetchReceiverID.amount;
       }
 
       return res.status(200).send({
@@ -287,9 +290,10 @@ const insertPayment = async (req, res) => {
 
     var date = new Date();
 
-    var dateString = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-      .toISOString()
-      .split("T")[0];
+    const year = date.getUTCFullYear();
+    const month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
+    const day = ("0" + date.getUTCDate()).slice(-2);
+    const formattedDate = `${year}-${month}-${day}`;
 
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, "0");
@@ -308,7 +312,6 @@ const insertPayment = async (req, res) => {
         receiverProfilePic: receiverData.profilePicture,
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
-        date: `${dateString}T${hours}:${minutes}:${seconds}`,
         isReceive: false,
         note: req.body.note,
       });
@@ -353,7 +356,6 @@ const insertPayment = async (req, res) => {
         senderJobTitle: senderData.jobTitle,
         receiverJobTitle: receiverData.jobTitle,
         isReceive: false,
-        date: `${dateString}T${hours}:${minutes}:${seconds}`,
         gifImage: "https://tippee.herokuapp.com/" + req.file.path,
         note: req.body.note,
       });
